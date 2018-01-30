@@ -247,8 +247,10 @@ class DroneSimEnv(gym.Env):
             distance = np.linalg.norm(self.position_hunter - self.position_target)
 
         self.previous_distance = distance
-
         self.state = self.get_state()
+
+        self.iteration = 0
+        self.episodes = 0
 
         return self.state
 

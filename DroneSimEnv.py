@@ -178,11 +178,13 @@ class DroneSimEnv(gym.Env):
             done = True
             reward = 0
             self.episodes += 1
+            self.iteration = 0
 
         if distance > self.max_detect_distance or distance < self.min_detect_distance or self.iteration > self.max_iteration:
             done = True
             reward = 0
             self.episodes += 1
+            self.iteration = 0
             if distance < self.min_detect_distance: reward = 100
 
         # control parameter

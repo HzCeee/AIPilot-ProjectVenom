@@ -125,14 +125,15 @@ class DroneSimEnv(gym.Env):
         yaw_radians = radians(orientation.item(2))
         pitch_radians = radians(orientation.item(1))
         roll_radians = radians(orientation.item(0))
-        f = np.matrix([0, 0, float(thrust)/float(mass), 1])
+        f = np.matrix([0, 0, -float(thrust)/float(mass), 1])
         R = np.matrix([[cos(yaw_radians)*cos(pitch_radians), cos(yaw_radians)*sin(pitch_radians)*sin(roll_radians)-sin(yaw_radians)*cos(roll_radians), cos(yaw_radians)*sin(pitch_radians)*cos(roll_radians) + sin(yaw_radians)*sin(roll_radians), 0],
                        [sin(yaw_radians)*cos(pitch_radians), sin(yaw_radians)*sin(pitch_radians)*sin(roll_radians)+cos(yaw_radians)*cos(roll_radians), sin(yaw_radians)*sin(pitch_radians)*cos(roll_radians) - cos(yaw_radians)*sin(roll_radians), 0],
                        [-sin(pitch_radians), cos(pitch_radians)*sin(roll_radians), cos(pitch_radians)*cos(roll_radians), 0],
                        [0, 0, 0, 1]])
         a = R*np.transpose(f)
+        a[2] *= -1
         a = np.transpose(a[:3])
-        a += np.matrix([0.0, 0.0, -mass*self.gravity])
+        a += np.matrix([0.0, 0.0, -self.gravity])
         return a
 
 

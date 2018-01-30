@@ -66,6 +66,10 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
         epoch_qs = []
         epoch_episodes = 0
         for epoch in range(nb_epochs):
+
+            episode_successful_count = []
+            episode_distance = []
+
             for cycle in range(nb_epoch_cycles):
                 # Perform rollouts.
                 for t_rollout in range(nb_rollout_steps):
@@ -84,6 +88,8 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                     episode_reward += r
                     episode_step += 1
 
+                    episode_distance.append(info['distance'])
+
                     # Book-keeping.
                     epoch_actions.append(action)
                     epoch_qs.append(q)
@@ -91,6 +97,12 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                     obs = new_obs
 
                     if done:
+
+                        if info['distance'] < 1: 
+                            episode_successful_count.append(1)
+                        else:
+                            episode_successful_count.append(0)
+
                         # Episode done.
                         epoch_episode_rewards.append(episode_reward)
                         episode_rewards_history.append(episode_reward)
@@ -143,6 +155,12 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
             duration = time.time() - start_time
             stats = agent.get_stats()
             combined_stats = stats.copy()
+
+            # only for test
+            combined_stats['successful_rate'] = np.mean(episode_successful_count)
+            combined_stats['average_distance'] = np.mean(episode_distance)
+            # only for test
+
             combined_stats['rollout/return'] = np.mean(epoch_episode_rewards)
             combined_stats['rollout/return_history'] = np.mean(episode_rewards_history)
             combined_stats['rollout/episode_steps'] = np.mean(epoch_episode_steps)

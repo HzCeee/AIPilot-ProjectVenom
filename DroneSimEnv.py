@@ -15,7 +15,7 @@ class DroneSimEnv(gym.Env):
         '''
         self.episodes = 0
         self.fps = 120
-        self.iteration, self.max_iteration = 0, 15 * self.fps
+        self.iteration, self.max_iteration = 0, 30 * self.fps
 
         self.mass_target = 1
         self.mass_hunter = 1
@@ -162,14 +162,14 @@ class DroneSimEnv(gym.Env):
         acceleration_target = self.get_accleration(self.orientation_target, self.thrust_target, self.mass_target)
         self.velocity_target += acceleration_target / self.fps
         if np.linalg.norm(self.velocity_target) > self.max_velocity: self.velocity_target *= self.max_velocity * np.linalg.norm(self.velocity_target)
-        self.position_target += self.velocity_target / self.fps
+        # self.position_target += self.velocity_target / self.fps # stationary target
 
         # update state
         self.state = self.get_state()
 
         # calculate reward and check if done
         distance = np.linalg.norm(self.position_target - self.position_hunter)
-        reward = self.previous_distance - distance
+        reward = (self.previous_distance - distance) * 500 # even if chasing at max speed, the reward will be 10 / 120 * 500 = 41.67
         self.previous_distance = distance
 
         done = False
@@ -177,6 +177,7 @@ class DroneSimEnv(gym.Env):
         if True not in is_in_view:
             done = True
             reward = 0
+            self.episodes += 1
 
         if distance > self.max_detect_distance or distance < self.min_detect_distance or self.iteration > self.max_iteration:
             done = True
@@ -187,7 +188,7 @@ class DroneSimEnv(gym.Env):
         # control parameter
         self.iteration += 1
 
-        return self.state, reward, done, {}
+        return self.state, reward, done, {'distance': distance}
 
 
     def get_state(self):

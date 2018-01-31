@@ -36,7 +36,7 @@ class DroneSimEnv(gym.Env):
         self.min_initial_distance, self.max_initial_distance = 5, 30
         self.min_detect_distance, self.max_detect_distance = 1, 30
 
-        self.max_absolute_angle = 360
+        self.max_absolute_angle = 180
 
         self.max_absolute_thrust = 2 * self.mass_hunter * self.gravity
         '''
@@ -53,20 +53,20 @@ class DroneSimEnv(gym.Env):
         self.min_position_z, self.max_position_z = -np.inf, np.inf # assume in open space
 
         # threshold for orientation
-        self.min_angle, self.max_angle = 0, 1 # 0 - 360
+        self.min_angle, self.max_angle = -1, 1 # -180 -> 180
         self.min_roll, self.max_roll = self.min_angle, self.max_angle
         self.min_pitch, self.max_pitch = self.min_angle, self.max_angle
         self.min_yaw, self.max_yaw = self.min_angle, self.max_angle
 
         # threshold for thrust
-        self.min_thrust, self.max_thrust = 0, 1 # 0 - 2 * self.mass_hunter * self.gravity
+        self.min_thrust, self.max_thrust = 0, 1 # 0 -> 2 * self.mass_hunter * self.gravity
 
         # threshold for relative position in view
         self.min_relative_x, self.max_relative_x = 0, 1 # 1 - 256
         self.min_relative_y, self.max_relative_y = 0, 1 # 1 - 144
 
         # threshold for distance within target and hunter
-        self.min_distance, self.max_distance = 0, 1 # 0 - 30
+        self.min_distance, self.max_distance = 0, 1 # 0 -> 30
 
         # threshold for state
         self.low_state = np.array(
@@ -93,12 +93,12 @@ class DroneSimEnv(gym.Env):
         assume symmetric actions
         '''
         # threshold for orientation
-        self.min_roll_action, self.max_roll_action = -0.5, 0.5 # 0 - 360
-        self.min_pitch_action, self.max_pitch_action = -0.5, 0.5 # 0 - 360
-        self.min_yaw_action, self.max_yaw_action = -0.5, 0.5 # 0 - 360
+        self.min_roll_action, self.max_roll_action = -1, 1 # -180 -> 180
+        self.min_pitch_action, self.max_pitch_action = -1, 1 # -180 -> 180
+        self.min_yaw_action, self.max_yaw_action = -1, 1 # -180 -> 180
 
         # threshold for thrust
-        self.min_thrust_action, self.max_thrust_action = -0.5, 0.5 # 0 - 2 * self.mass_hunter * self.gravity
+        self.min_thrust_action, self.max_thrust_action = -1, 1 # -2 * self.mass_hunter * self.gravity -> 2 * self.mass_hunter * self.gravity
 
         # threshold for action
         self.low_action = np.array([self.min_roll_action, self.min_pitch_action, self.min_yaw_action, self.min_thrust_action])
@@ -138,7 +138,7 @@ class DroneSimEnv(gym.Env):
 
 
     def step(self, action):
-        roll, pitch, yaw, thrust = action[0] + 0.5, action[1] + 0.5, action[2] + 0.5, action[3] + 0.5 # recover to range [0, 1]
+        roll, pitch, yaw, thrust = action[0], action[1], action[2], action[3]
 
         # update hunter
         self.orientation_hunter += np.matrix([self.roll_angular_acceleration * roll / self.fps, self.pitch_angular_acceleration * pitch / self.fps, self.yaw_angular_acceleration * yaw / self.fps])
